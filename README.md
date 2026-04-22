@@ -76,16 +76,8 @@ graph TD
     API --> Graph
 ```
 ---
-    | Frontend Ecosystem | Backend & AI Engine |
-| :--- | :--- |
-| **Next.js 14 (App Router)**<br>Core application framework | **FastAPI (Python)**<br>High-performance RESTful API |
-| **Tailwind CSS**<br>Utility-first styling | **Google GenAI SDK**<br>LLM integration (Gemini 2.0 Flash) |
-| **Shadcn UI**<br>Enterprise "Bureaucratic Light" theme | **Tenacity**<br>API resilience and retry logic |
-| **Zustand & React Context**<br>Client-side state management | **PyPDF2 & pdf2image**<br>PDF parsing and image conversion |
-| **Mermaid.js**<br>Visual decision tree rendering | **Tesseract OCR**<br>Physical document and stamp extraction |
 
----
-
+##Tech Stack
 procure-ai/
 ├── frontend/                  # Next.js Application
 │   ├── app/                   # App Router pages (Dashboard, Matrix, Audit)
