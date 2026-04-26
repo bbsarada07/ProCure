@@ -56,6 +56,7 @@ export interface HITLModalProps {
 
 export function HITLModal({ isOpen, onClose, bidderName, criterion, isFraud }: HITLModalProps) {
   const [showResubmissionLink, setShowResubmissionLink] = useState(false);
+  const [isDocumentBlurred, setIsDocumentBlurred] = useState(criterion.status === 'Needs Review');
   const isNeedsReview = criterion.status === 'Needs Review';
   
   return (
@@ -125,11 +126,18 @@ export function HITLModal({ isOpen, onClose, bidderName, criterion, isFraud }: H
                   <div>
                     <h3 className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-3">Human-in-the-Loop Triage</h3>
                     <div className="space-y-3">
-                      <Button className="w-full bg-emerald-600 hover:bg-emerald-700 h-10 gap-2 shadow-sm font-semibold">
+                      <Button 
+                        className="w-full bg-emerald-600 hover:bg-emerald-700 h-10 gap-2 shadow-sm font-semibold"
+                        onClick={onClose}
+                      >
                         <CheckCircle2 className="w-4 h-4" />
                         Approve Criteria
                       </Button>
-                      <Button variant="outline" className="w-full border-rose-200 text-rose-600 hover:bg-rose-50 hover:text-rose-700 h-10 gap-2 font-bold shadow-sm">
+                      <Button 
+                        variant="outline" 
+                        className="w-full border-rose-200 text-rose-600 hover:bg-rose-50 hover:text-rose-700 h-10 gap-2 font-bold shadow-sm"
+                        onClick={onClose}
+                      >
                         <XCircle className="w-4 h-4" />
                         Reject Criteria
                       </Button>
@@ -155,7 +163,20 @@ export function HITLModal({ isOpen, onClose, bidderName, criterion, isFraud }: H
                             <div className="flex-1 h-8 bg-white border border-blue-200 rounded px-2 flex items-center text-[11px] font-mono text-blue-700 truncate">
                               procure.gov.in/upload/req-xyz-4491
                             </div>
-                            <Button size="icon" variant="outline" className="h-8 w-8 border-blue-200 text-blue-600 hover:bg-blue-100">
+                            <Button 
+                              size="icon" 
+                              variant="outline" 
+                              className="h-8 w-8 border-blue-200 text-blue-600 hover:bg-blue-100"
+                              onClick={() => {
+                                navigator.clipboard.writeText('procure.gov.in/upload/req-xyz-4491');
+                                const btn = document.activeElement as HTMLButtonElement;
+                                if (btn) {
+                                  const originalContent = btn.innerHTML;
+                                  btn.innerHTML = '<span class="text-[8px] font-bold">COPIED</span>';
+                                  setTimeout(() => btn.innerHTML = originalContent, 2000);
+                                }
+                              }}
+                            >
                               <Copy className="w-3.5 h-3.5" />
                             </Button>
                           </div>
@@ -212,7 +233,7 @@ export function HITLModal({ isOpen, onClose, bidderName, criterion, isFraud }: H
                     {/* The "Found" data section */}
                     <div className="relative group pt-4">
                       <div className="h-12 border-2 border-dashed border-amber-400/60 rounded bg-amber-400/20 flex items-center justify-center">
-                        {isNeedsReview ? (
+                        {isDocumentBlurred ? (
                           <div className="blur-sm select-none text-slate-900 font-bold text-xl tracking-tighter">
                             TOTAL TURNOVER: 5,12,00,000
                           </div>
@@ -230,13 +251,27 @@ export function HITLModal({ isOpen, onClose, bidderName, criterion, isFraud }: H
                     <div className="h-4 bg-slate-100 w-full rounded" />
                   </div>
 
-                  {isNeedsReview && (
-                    <div className="absolute inset-0 bg-slate-300/30 backdrop-blur-[2px] flex items-center justify-center">
-                      <div className="bg-white/90 p-4 rounded-xl shadow-xl flex flex-col items-center gap-3 max-w-[200px] text-center">
-                        <ImageIcon className="w-8 h-8 text-amber-500" />
-                        <p className="text-[11px] font-bold text-slate-900 leading-tight">
-                          Low Legibility Detected. Manual verification required.
-                        </p>
+                  {isDocumentBlurred && (
+                    <div className="absolute inset-0 bg-slate-300/30 backdrop-blur-[4px] flex items-center justify-center z-20">
+                      <div className="bg-white/90 p-6 rounded-xl shadow-2xl flex flex-col items-center gap-4 max-w-[240px] text-center border border-amber-200">
+                        <div className="p-3 bg-amber-100 rounded-full">
+                          <ImageIcon className="w-8 h-8 text-amber-600" />
+                        </div>
+                        <div className="space-y-1">
+                          <p className="text-xs font-bold text-slate-900 leading-tight">
+                            Low Legibility Detected
+                          </p>
+                          <p className="text-[10px] text-slate-500">
+                            AI could not verify this area with high confidence.
+                          </p>
+                        </div>
+                        <Button 
+                          size="sm" 
+                          className="w-full bg-slate-900 text-white hover:bg-slate-800 text-[10px] h-8"
+                          onClick={() => setIsDocumentBlurred(false)}
+                        >
+                          Reveal Document
+                        </Button>
                       </div>
                     </div>
                   )}
@@ -245,11 +280,16 @@ export function HITLModal({ isOpen, onClose, bidderName, criterion, isFraud }: H
 
               {/* View Controls */}
               <div className="mt-8 flex gap-3">
-                <Button size="sm" variant="secondary" className="bg-white shadow-sm h-8 px-4 gap-2 text-xs font-bold text-slate-600">
-                  <FileText className="w-3.5 h-3.5" /> Full Document
+                <Button 
+                  size="sm" 
+                  variant="secondary" 
+                  className="bg-white shadow-sm h-8 px-4 gap-2 text-xs font-bold text-slate-600"
+                  onClick={() => setIsDocumentBlurred(!isDocumentBlurred)}
+                >
+                  <Eye className="w-3.5 h-3.5" /> {isDocumentBlurred ? 'Reveal' : 'Blur'} Document
                 </Button>
                 <Button size="sm" variant="secondary" className="bg-white shadow-sm h-8 px-4 gap-2 text-xs font-bold text-slate-600">
-                  <Eye className="w-3.5 h-3.5" /> Next Match
+                  <FileText className="w-3.5 h-3.5" /> Full Document
                 </Button>
               </div>
             </div>

@@ -17,12 +17,7 @@ import {
   Edit3,
   Bot,
   Download,
-  Loader2,
-  History,
-  Terminal,
-  ShieldCheck,
-  AlertTriangle,
-  GitCompare
+  Loader2
 } from 'lucide-react';
 import { MOCK_CRITERIA_EXTRACTION } from '@/lib/mockData';
 import { useRouter, useParams } from 'next/navigation';
@@ -33,7 +28,6 @@ import {
   DialogTitle,
   DialogDescription,
 } from "@/components/ui/dialog";
-import { cn } from '@/lib/utils';
 
 export default function CriteriaSetupPage() {
   const router = useRouter();
@@ -43,7 +37,6 @@ export default function CriteriaSetupPage() {
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
   const [isFinalizing, setIsFinalizing] = useState(false);
   const [editingCriterion, setEditingCriterion] = useState<any>(null);
-  const [showVersionHistory, setShowVersionHistory] = useState(false);
 
   const handleSaveEdit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -53,204 +46,194 @@ export default function CriteriaSetupPage() {
 
   const handleFinalize = () => {
     setIsFinalizing(true);
+    // Simulate API save
     setTimeout(() => {
       router.push(`/tender/${params.id}/evaluation`);
     }, 1500);
   };
 
-  const DiffView = () => (
-    <div className="space-y-6 p-6 animate-in fade-in zoom-in-95 duration-500">
-      <div className="flex items-center gap-3 p-4 bg-amber-50 border border-amber-200 rounded-lg">
-        <AlertTriangle className="w-5 h-5 text-amber-600 shrink-0" />
-        <p className="text-xs font-serif font-medium text-amber-800 leading-normal">
-          <span className="font-bold">Notice of Corrigendum:</span> Tender criteria updated to <span className="font-mono font-black">V2</span>. 4 draft evaluations have been automatically re-run against new rules to ensure deterministic consistency.
+  const DocumentContent = ({ isModal = false }) => (
+    <div id={isModal ? "tender-doc-full" : "tender-doc-preview"} className={`${isModal ? 'max-w-4xl' : 'max-w-2xl'} mx-auto p-12 bg-white shadow-sm ${!isModal && 'my-8 border border-slate-100'} min-h-[1000px] relative text-slate-800 font-serif leading-relaxed`}>
+      <header className="text-center mb-16 border-b-2 border-double border-slate-200 pb-8">
+        <h1 className="text-2xl font-black text-slate-900 mb-1">GOVERNMENT OF INDIA</h1>
+        <h2 className="text-xl font-bold text-slate-700 tracking-[0.2em] uppercase">Central Reserve Police Force</h2>
+        <div className="mt-6 flex flex-col items-center gap-1">
+          <span className="text-[10px] font-bold uppercase text-slate-400 tracking-widest">Document Reference</span>
+          <span className="text-xs font-mono font-bold bg-slate-100 px-3 py-1 rounded">CRPF/CS/2026/04-V4</span>
+        </div>
+        <p className="text-sm mt-8 italic text-slate-500">Notice Inviting Tender (NIT)</p>
+      </header>
+
+      <section className="space-y-6 mb-12">
+        <h3 className="text-lg font-black text-slate-900 border-l-4 border-blue-600 pl-4 uppercase tracking-wide">Section 4.1: Financial Eligibility</h3>
+        <p className="text-[15px]">
+          The bidder must demonstrate strong financial stability. The <span className="font-bold underline decoration-blue-500/30">minimum average annual turnover</span> of the bidder during the last three financial years (up to 31st March 2025) should not be less than <span className="font-bold bg-blue-50 text-blue-900 px-1.5 py-0.5 rounded border border-blue-200">₹5,00,00,000 (Rupees Five Crore only)</span>.
         </p>
-      </div>
-
-      <div className="grid grid-cols-2 gap-4">
-        {/* V1 - Old */}
-        <div className="space-y-3">
-          <div className="flex items-center gap-2">
-            <Badge variant="outline" className="text-[9px] font-mono uppercase bg-slate-100 text-slate-500 border-stone-200">Revision V1</Badge>
-            <span className="text-[10px] font-mono text-slate-400 uppercase tracking-widest">Archived Matrix</span>
-          </div>
-          <div className="p-4 rounded border border-rose-100 bg-rose-50/30 space-y-2 opacity-60">
-            <h4 className="text-[11px] font-serif font-black text-slate-900 uppercase">Criterion #4: Submission Window</h4>
-            <div className="p-2 bg-rose-100/50 rounded border border-rose-200">
-              <p className="text-[10px] font-mono text-rose-800 line-through">Submission Window: 14 Days from publication</p>
-            </div>
-            <p className="text-[10px] font-serif italic text-slate-500">Node marked as non-compliant with GFR 2026.</p>
-          </div>
+        <div className="flex items-start gap-3 p-4 bg-amber-50 rounded-lg border border-amber-100">
+          <AlertCircle className="w-5 h-5 text-amber-600 shrink-0 mt-0.5" />
+          <p className="text-xs text-amber-800 italic leading-normal">
+            Note: Audited balance sheets certified by a registered Chartered Accountant (CA) must be submitted as proof of financial compliance.
+          </p>
         </div>
+      </section>
 
-        {/* V2 - New */}
-        <div className="space-y-3">
-          <div className="flex items-center gap-2">
-            <Badge variant="outline" className="text-[9px] font-mono uppercase bg-emerald-50 text-emerald-700 border-emerald-200">Revision V2 (ACTIVE)</Badge>
-            <span className="text-[10px] font-mono text-slate-400 uppercase tracking-widest">Live Node</span>
-          </div>
-          <div className="p-4 rounded border border-emerald-100 bg-emerald-50/30 space-y-2 shadow-sm">
-            <h4 className="text-[11px] font-serif font-black text-slate-900 uppercase">Criterion #4: Submission Window</h4>
-            <div className="p-2 bg-emerald-100/50 rounded border border-emerald-200">
-              <p className="text-[10px] font-mono text-emerald-800 font-bold">Submission Window: 21 Days from publication</p>
-            </div>
-            <p className="text-[10px] font-serif italic text-emerald-700 font-medium">Compliance verified. Deterministic match established.</p>
-          </div>
-        </div>
-      </div>
+      <section className="space-y-6 mb-12">
+        <h3 className="text-lg font-black text-slate-900 border-l-4 border-slate-300 pl-4 uppercase tracking-wide">Section 4.2: Experience</h3>
+        <p className="text-[15px]">
+          Bidders must have experience in executing <span className="font-bold underline decoration-slate-300">at least 3 (three) similar works</span> of construction for Government/Semi-Government/PSUs during the last 5 years.
+        </p>
+      </section>
+
+      <section className="space-y-6">
+        <h3 className="text-lg font-black text-slate-900 border-l-4 border-slate-300 pl-4 uppercase tracking-wide">Section 5: Statutory Compliance</h3>
+        <p className="text-[15px]">
+          Valid GST registration and ISO 9001:2015 certifications are mandatory requirements for eligibility. Failure to provide current certificates will result in automatic disqualification at the technical stage.
+        </p>
+      </section>
+
+      <div className="h-32" />
     </div>
   );
 
   return (
-    <div className="h-[calc(100vh-2rem)] flex flex-col space-y-4 animate-in fade-in slide-in-from-bottom-4 duration-700 watermark">
-      <div className="flex items-center justify-between pb-2 border-b border-stone-200/60">
+    <div className="h-full flex flex-col space-y-6 animate-in slide-in-from-bottom-4 duration-500">
+      <div className="flex items-center justify-between">
         <div>
-          <div className="flex items-center gap-2 text-slate-500 text-[10px] font-mono uppercase tracking-[0.2em] mb-1">
+          <div className="flex items-center gap-2 text-slate-500 text-sm mb-1">
             <span>Tenders</span>
-            <ChevronRight className="w-2.5 h-2.5" />
-            <span className="font-bold text-slate-900 font-mono">CRPF-CS-2026-004</span>
+            <ChevronRight className="w-3 h-3" />
+            <span className="font-medium text-slate-900">CRPF Construction Services 2026</span>
           </div>
-          <h2 className="text-2xl font-serif font-black text-slate-900 tracking-tight uppercase">Criteria Extraction Ledger</h2>
+          <h2 className="text-2xl font-bold text-slate-900">Criteria Extraction & Setup</h2>
         </div>
-        <div className="flex items-center gap-3">
-          <div className="flex items-center gap-2 mr-4">
-            <Label htmlFor="version-toggle" className="text-[10px] font-mono font-black uppercase text-slate-400 tracking-widest">Version History</Label>
-            <Switch 
-              id="version-toggle"
-              checked={showVersionHistory}
-              onCheckedChange={setShowVersionHistory}
-              className="data-[state=checked]:bg-[#020410]"
-            />
-          </div>
-          <Button 
-            className="h-8 bg-[#020410] hover:bg-[#0a1025] gap-2 text-[10px] font-mono font-black uppercase tracking-widest px-6 shadow-xl text-white"
-            onClick={handleFinalize}
-            disabled={isFinalizing}
-          >
-            {isFinalizing ? <Loader2 className="w-3 h-3 animate-spin" /> : <ShieldCheck className="w-3 h-3" />}
-            Finalize Evaluation Node
-          </Button>
-        </div>
+        <Button 
+          className="bg-blue-600 hover:bg-blue-700 min-w-[140px] gap-2"
+          onClick={handleFinalize}
+          disabled={isFinalizing}
+        >
+          {isFinalizing ? (
+            <>
+              <Loader2 className="w-4 h-4 animate-spin" />
+              Finalizing...
+            </>
+          ) : (
+            'Finalize Criteria'
+          )}
+        </Button>
       </div>
 
-      <div className="flex-1 grid grid-cols-2 gap-6 overflow-hidden">
-        {/* Left Section: Document or Diff */}
-        <Card className="border-none shadow-sm bg-white/80 backdrop-blur-sm flex flex-col overflow-hidden defense-shadow">
-          <CardHeader className="py-3 px-6 border-b border-stone-100 bg-stone-50/50 flex flex-row items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="p-2 bg-[#020410] rounded shadow-sm">
-                {showVersionHistory ? <GitCompare className="w-3.5 h-3.5 text-white" /> : <FileText className="w-3.5 h-3.5 text-white" />}
-              </div>
-              <div>
-                <CardTitle className="text-[10px] font-mono font-black uppercase tracking-[0.3em] text-slate-400">
-                  {showVersionHistory ? 'Corrigendum Analysis' : 'Primary Source Node'}
-                </CardTitle>
-                <CardDescription className="text-[9px] font-mono uppercase text-slate-500">
-                  {showVersionHistory ? 'Comparing V1 vs V2 structural changes' : 'Tender_Document_Draft_V4.pdf'}
-                </CardDescription>
-              </div>
+      <div className="flex-1 grid grid-cols-1 lg:grid-cols-2 gap-6 overflow-hidden">
+        {/* Left: Mock PDF Viewer */}
+        <Card className="border border-slate-200 shadow-sm bg-white flex flex-col overflow-hidden">
+          <div className="p-4 border-b border-slate-100 flex justify-between items-center bg-slate-50/80 backdrop-blur">
+            <div className="flex items-center gap-2 text-slate-900">
+              <FileText className="w-4 h-4 text-blue-600" />
+              <span className="text-sm font-bold">Tender_Document_Draft_V4.pdf</span>
             </div>
-            {!showVersionHistory && (
-              <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-400" onClick={() => setIsPreviewOpen(true)}>
+            <div className="flex items-center gap-2">
+              <Button 
+                variant="outline" 
+                size="sm" 
+                className="h-8 gap-2 bg-white text-slate-600 border-slate-200 hover:bg-slate-50"
+                onClick={() => {
+                  const content = document.getElementById('tender-doc-preview')?.innerText || '';
+                  const blob = new Blob([content], { type: 'text/plain' });
+                  const url = URL.createObjectURL(blob);
+                  const link = document.createElement('a');
+                  link.href = url;
+                  link.download = 'Tender_Document_Draft_V4.txt';
+                  link.click();
+                  URL.revokeObjectURL(url);
+                }}
+              >
+                <Download className="w-3.5 h-3.5" />
+                Download PDF
+              </Button>
+              <Button 
+                variant="ghost" 
+                size="icon" 
+                className="h-8 w-8 text-slate-400 hover:text-blue-600 hover:bg-blue-50 transition-colors"
+                onClick={() => setIsPreviewOpen(true)}
+              >
                 <Eye className="w-4 h-4" />
               </Button>
-            )}
-          </CardHeader>
-          <ScrollArea className="flex-1">
-            {showVersionHistory ? (
-              <DiffView />
-            ) : (
-              <div className="p-12 bg-white min-h-full font-serif leading-relaxed text-slate-800">
-                <header className="text-center mb-16 border-b-2 border-double border-slate-200 pb-8">
-                  <h1 className="text-xl font-black text-slate-900 mb-1">GOVERNMENT OF INDIA</h1>
-                  <h2 className="text-lg font-bold text-slate-700 tracking-[0.2em] uppercase">Central Reserve Police Force</h2>
-                  <div className="mt-6 flex flex-col items-center gap-1">
-                    <span className="text-[10px] font-bold uppercase text-slate-400 tracking-widest">Document Reference</span>
-                    <span className="text-xs font-mono font-bold bg-slate-100 px-3 py-1 rounded">CRPF/CS/2026/04-V4</span>
-                  </div>
-                </header>
-
-                <section className="space-y-6 mb-12">
-                  <h3 className="text-base font-black text-slate-900 border-l-4 border-[#020410] pl-4 uppercase tracking-wide">Section 4.1: Financial Eligibility</h3>
-                  <p className="text-[14px]">
-                    The bidder must demonstrate strong financial stability. The <span className="font-bold underline decoration-slate-300">minimum average annual turnover</span> of the bidder during the last three financial years should not be less than <span className="font-bold bg-slate-100 text-slate-900 px-1.5 py-0.5 rounded border border-slate-200">₹5,00,00,000 (Rupees Five Crore only)</span>.
-                  </p>
-                </section>
-
-                <section className="space-y-6 mb-12">
-                  <h3 className="text-base font-black text-slate-900 border-l-4 border-slate-300 pl-4 uppercase tracking-wide">Section 4.2: Experience</h3>
-                  <p className="text-[14px]">
-                    Bidders must have experience in executing <span className="font-bold underline decoration-slate-300">at least 3 (three) similar works</span> of construction for Government/Semi-Government/PSUs during the last 5 years.
-                  </p>
-                </section>
-              </div>
-            )}
+            </div>
+          </div>
+          <ScrollArea className="flex-1 bg-slate-100/30">
+            <DocumentContent />
           </ScrollArea>
         </Card>
 
-        {/* Right Section: AI Extraction List */}
-        <Card className="border-none shadow-sm bg-white/80 backdrop-blur-sm flex flex-col overflow-hidden defense-shadow">
-          <CardHeader className="py-3 px-6 border-b border-stone-100 bg-stone-50/50 flex flex-row items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="p-2 bg-emerald-500 rounded shadow-glow-emerald">
-                <Bot className="w-3.5 h-3.5 text-white" />
-              </div>
+        {/* Right: AI Extraction List */}
+        <Card className="border-none shadow-lg bg-white overflow-hidden flex flex-col">
+          <CardHeader className="bg-slate-50 border-b pb-4">
+            <div className="flex items-center justify-between">
               <div>
-                <CardTitle className="text-[10px] font-mono font-black uppercase tracking-[0.3em] text-slate-400">AI Vector Extraction</CardTitle>
-                <CardDescription className="text-[9px] font-mono uppercase text-slate-500">Deterministic mapping of eligibility parameters</CardDescription>
+                <CardTitle className="text-lg flex items-center gap-2">
+                  <Bot className="w-5 h-5 text-blue-600" />
+                  AI-Extracted Criteria
+                </CardTitle>
+                <CardDescription>Verify and approve extracted eligibility parameters.</CardDescription>
               </div>
+              <Badge className="bg-slate-900 text-white">4 Items Found</Badge>
             </div>
-            <Badge className="bg-[#020410] text-white text-[9px] font-mono uppercase px-2 h-5 tracking-widest">{criteria.length} Parameters</Badge>
           </CardHeader>
           <ScrollArea className="flex-1">
-            <div className="p-6 space-y-4">
+            <div className="p-4 space-y-4">
               {criteria.map((item) => (
                 <div 
                   key={item.id}
                   onClick={() => setSelectedId(item.id)}
-                  className={cn(
-                    "p-5 rounded-lg border transition-all cursor-pointer group relative overflow-hidden",
+                  className={`p-4 rounded-xl border transition-all cursor-pointer ${
                     selectedId === item.id 
-                    ? 'border-emerald-500 bg-emerald-50/30 shadow-lg' 
-                    : 'border-stone-100 hover:border-stone-200 bg-white/50'
-                  )}
+                    ? 'border-blue-500 bg-blue-50/50 shadow-md ring-1 ring-blue-500' 
+                    : 'border-slate-100 hover:border-slate-300'
+                  }`}
                 >
-                  <div className="flex items-start justify-between mb-3 relative z-10">
+                  <div className="flex items-start justify-between mb-3">
                     <div className="flex items-center gap-2">
-                      <Badge className={cn("text-[8px] font-mono font-black uppercase h-4 px-1.5",
-                        item.category === 'Financial' ? 'bg-emerald-100 text-emerald-700 border-emerald-200' :
-                        item.category === 'Technical' ? 'bg-blue-100 text-blue-700 border-blue-200' :
-                        'bg-slate-100 text-slate-700 border-slate-200'
-                      )}>
+                      <Badge variant="outline" className={`${
+                        item.category === 'Financial' ? 'text-green-700 bg-green-50 border-green-200' :
+                        item.category === 'Technical' ? 'text-blue-700 bg-blue-50 border-blue-200' :
+                        'text-slate-700 bg-slate-100 border-slate-200'
+                      }`}>
                         {item.category}
                       </Badge>
-                      {item.isMandatory && (
-                        <Badge className="bg-rose-500/10 text-rose-600 border-rose-500/20 text-[8px] font-mono font-black uppercase h-4 px-1.5">Mandatory</Badge>
+                      {item.isMandatory ? (
+                        <Badge className="bg-slate-900 text-white hover:bg-slate-900 text-[9px] h-4.5 px-2 font-bold uppercase tracking-tighter">
+                          Mandatory
+                        </Badge>
+                      ) : (
+                        <Badge variant="outline" className="border-slate-300 text-slate-500 text-[9px] h-4.5 px-2 font-bold uppercase tracking-tighter">
+                          Optional
+                        </Badge>
                       )}
                     </div>
-                    <Button 
-                      variant="ghost" 
-                      size="icon" 
-                      className="h-6 w-6 text-slate-300 hover:text-[#020410] hover:bg-white"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setEditingCriterion({...item});
-                      }}
-                    >
-                      <Edit3 className="w-3 h-3" />
-                    </Button>
-                  </div>
-                  <h4 className="text-xs font-serif font-black text-slate-900 uppercase tracking-tight mb-1">{item.description}</h4>
-                  <p className="text-[11px] font-serif italic text-slate-600 leading-relaxed font-medium mb-4">{item.requirement}</p>
-                  
-                  <div className="flex items-center justify-between pt-3 border-t border-stone-100/60 relative z-10">
-                    <div className="flex items-center gap-1.5">
-                      <Terminal className="w-3 h-3 text-emerald-500" />
-                      <span className="text-[9px] font-mono font-black text-slate-400 uppercase tracking-widest">Confidence Index: 0.98</span>
+                    <div className="flex gap-1">
+                      <Button 
+                        variant="ghost" 
+                        size="icon" 
+                        className="h-7 w-7 text-slate-400 hover:text-blue-600 hover:bg-blue-50"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setEditingCriterion({...item});
+                        }}
+                      >
+                        <Edit3 className="w-3.5 h-3.5" />
+                      </Button>
                     </div>
-                    <div className="flex items-center space-x-3">
-                      <span className="text-[8px] font-mono font-black text-slate-400 uppercase">Verification Status</span>
-                      <Switch defaultChecked className="data-[state=checked]:bg-emerald-600" />
+                  </div>
+                  <h4 className="font-semibold text-slate-900">{item.description}</h4>
+                  <p className="text-sm text-slate-600 mt-1 mb-4 leading-relaxed">{item.requirement}</p>
+                  
+                  <div className="flex items-center justify-between pt-3 border-t border-slate-200/50">
+                    <div className="flex items-center gap-1.5">
+                      <CheckCircle2 className="w-4 h-4 text-green-500" />
+                      <span className="text-xs font-medium text-slate-500 italic">Confidence: 98%</span>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <Label className="text-[11px] font-bold uppercase text-slate-400">Approved</Label>
+                      <Switch defaultChecked className="data-[state=checked]:bg-blue-600" />
                     </div>
                   </div>
                 </div>
@@ -259,6 +242,86 @@ export default function CriteriaSetupPage() {
           </ScrollArea>
         </Card>
       </div>
+      <Dialog open={isPreviewOpen} onOpenChange={setIsPreviewOpen}>
+        <DialogContent className="max-w-5xl h-[90vh] p-0 bg-white border-none shadow-2xl flex flex-col overflow-hidden">
+          <div className="p-4 border-b border-slate-100 flex justify-between items-center bg-slate-50">
+            <div className="flex items-center gap-2">
+              <div className="w-8 h-8 bg-blue-50 rounded-lg flex items-center justify-center">
+                <FileText className="w-4 h-4 text-blue-600" />
+              </div>
+              <div>
+                <DialogTitle className="text-sm font-bold text-slate-900">Full Document Preview</DialogTitle>
+                <DialogDescription className="text-[10px] uppercase font-bold text-slate-400 tracking-widest">CRPF/CS/2026/04-V4 • Official Tender</DialogDescription>
+              </div>
+            </div>
+            <div className="flex items-center gap-2 pr-12">
+              <Button 
+                variant="outline" 
+                size="sm" 
+                className="h-8 gap-2 bg-white text-slate-600 border-slate-200"
+                onClick={() => {
+                  const content = document.getElementById('tender-doc-full')?.innerText || '';
+                  const blob = new Blob([content], { type: 'text/plain' });
+                  const url = URL.createObjectURL(blob);
+                  const link = document.createElement('a');
+                  link.href = url;
+                  link.download = 'Tender_Document_Draft_V4.txt';
+                  link.click();
+                  URL.revokeObjectURL(url);
+                }}
+              >
+                <Download className="w-3.5 h-3.5" />
+                Download Copy
+              </Button>
+            </div>
+          </div>
+          <ScrollArea className="flex-1 bg-slate-50/50 p-12">
+            <DocumentContent isModal />
+          </ScrollArea>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={!!editingCriterion} onOpenChange={(open) => !open && setEditingCriterion(null)}>
+        <DialogContent className="max-w-md bg-white border-none shadow-2xl">
+          <DialogHeader>
+            <div className="w-10 h-10 bg-blue-50 rounded-xl flex items-center justify-center mb-4">
+              <Edit3 className="w-5 h-5 text-blue-600" />
+            </div>
+            <DialogTitle className="text-xl">Refine AI Criterion</DialogTitle>
+            <DialogDescription>
+              Manually adjust the extracted parameter to ensure it perfectly matches the tender requirements.
+            </DialogDescription>
+          </DialogHeader>
+          <form onSubmit={handleSaveEdit} className="space-y-6 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="title" className="text-xs font-black uppercase text-slate-400 tracking-widest">Criterion Title</Label>
+              <Input 
+                id="title"
+                value={editingCriterion?.description || ''}
+                onChange={(e) => setEditingCriterion({...editingCriterion, description: e.target.value})}
+                className="h-10 border-slate-200 focus-visible:ring-blue-500/20"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="req" className="text-xs font-black uppercase text-slate-400 tracking-widest">Requirement Detail</Label>
+              <textarea 
+                id="req"
+                value={editingCriterion?.requirement || ''}
+                onChange={(e) => setEditingCriterion({...editingCriterion, requirement: e.target.value})}
+                className="w-full min-h-[100px] p-3 rounded-lg border border-slate-200 bg-transparent text-sm focus:outline-none focus:ring-3 focus:ring-blue-500/20 focus:border-blue-500/50 transition-all"
+              />
+            </div>
+            <div className="flex gap-3 justify-end pt-4">
+              <Button type="button" variant="ghost" onClick={() => setEditingCriterion(null)} className="text-slate-500 font-bold">
+                Cancel
+              </Button>
+              <Button type="submit" className="bg-blue-600 hover:bg-blue-700 font-bold px-6">
+                Save Changes
+              </Button>
+            </div>
+          </form>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

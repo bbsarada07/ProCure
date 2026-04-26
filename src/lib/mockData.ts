@@ -15,6 +15,8 @@ export interface Bidder {
   name: string;
   criteria: Record<string, Criterion>;
   overallStatus: 'Pass' | 'Fail' | 'Needs Review';
+  riskScore: number;
+  riskAnomalies: string[];
 }
 
 export interface AuditLog {
@@ -52,7 +54,7 @@ export const MOCK_CRITERIA_EXTRACTION = [
     category: 'Compliance',
     description: 'ISO Certification',
     requirement: 'ISO 9001:2015 certification',
-    isMandatory: true,
+    isMandatory: false,
   },
 ];
 
@@ -61,110 +63,130 @@ export const MOCK_BIDDERS: Bidder[] = [
     id: 'bid_1',
     name: 'Apex Infrastructure Pvt Ltd',
     overallStatus: 'Pass',
+    riskScore: 12,
+    riskAnomalies: [],
     criteria: {
       crit_1: { id: 'crit_1', category: 'Financial', description: 'Turnover', requirement: '₹5Cr', isMandatory: true, status: 'Pass', extractedValue: '₹6.2 Crore', confidenceScore: 0.98 },
       crit_2: { id: 'crit_2', category: 'Technical', description: 'Projects', requirement: '3 Projects', isMandatory: true, status: 'Pass', extractedValue: '4 Projects', confidenceScore: 0.95 },
       crit_3: { id: 'crit_3', category: 'Compliance', description: 'GST', requirement: 'Valid', isMandatory: true, status: 'Pass', extractedValue: 'Verified', confidenceScore: 0.99 },
-      crit_4: { id: 'crit_4', category: 'Compliance', description: 'ISO', requirement: 'Valid', isMandatory: true, status: 'Pass', extractedValue: 'Verified', confidenceScore: 0.97 },
+      crit_4: { id: 'crit_4', category: 'Compliance', description: 'ISO', requirement: 'Valid', isMandatory: false, status: 'Pass', extractedValue: 'Verified', confidenceScore: 0.97 },
     },
   },
   {
     id: 'bid_2',
     name: 'Bharat Steel Works',
     overallStatus: 'Needs Review',
+    riskScore: 45,
+    riskAnomalies: ['Inconsistent turnover reporting', 'Document blurriness'],
     criteria: {
       crit_1: { id: 'crit_1', category: 'Financial', description: 'Turnover', requirement: '₹5Cr', isMandatory: true, status: 'Needs Review', extractedValue: 'Not Clearly Legible', confidenceScore: 0.42 },
       crit_2: { id: 'crit_2', category: 'Technical', description: 'Projects', requirement: '3 Projects', isMandatory: true, status: 'Pass', extractedValue: '3 Projects', confidenceScore: 0.88 },
       crit_3: { id: 'crit_3', category: 'Compliance', description: 'GST', requirement: 'Valid', isMandatory: true, status: 'Pass', extractedValue: 'Verified', confidenceScore: 0.99 },
-      crit_4: { id: 'crit_4', category: 'Compliance', description: 'ISO', requirement: 'Valid', isMandatory: true, status: 'Pass', extractedValue: 'Verified', confidenceScore: 0.97 },
+      crit_4: { id: 'crit_4', category: 'Compliance', description: 'ISO', requirement: 'Valid', isMandatory: false, status: 'Pass', extractedValue: 'Verified', confidenceScore: 0.97 },
     },
   },
   {
     id: 'bid_3',
     name: 'City Buildcon',
     overallStatus: 'Fail',
+    riskScore: 88,
+    riskAnomalies: ['Turnover below threshold', 'Multiple litigation flags', 'Incomplete technical history'],
     criteria: {
       crit_1: { id: 'crit_1', category: 'Financial', description: 'Turnover', requirement: '₹5Cr', isMandatory: true, status: 'Fail', extractedValue: '₹3.8 Crore', confidenceScore: 0.96 },
       crit_2: { id: 'crit_2', category: 'Technical', description: 'Projects', requirement: '3 Projects', isMandatory: true, status: 'Pass', extractedValue: '5 Projects', confidenceScore: 0.92 },
       crit_3: { id: 'crit_3', category: 'Compliance', description: 'GST', requirement: 'Valid', isMandatory: true, status: 'Pass', extractedValue: 'Verified', confidenceScore: 0.99 },
-      crit_4: { id: 'crit_4', category: 'Compliance', description: 'ISO', requirement: 'Valid', isMandatory: true, status: 'Pass', extractedValue: 'Verified', confidenceScore: 0.97 },
+      crit_4: { id: 'crit_4', category: 'Compliance', description: 'ISO', requirement: 'Valid', isMandatory: false, status: 'Pass', extractedValue: 'Verified', confidenceScore: 0.97 },
     },
   },
   {
     id: 'bid_4',
     name: 'Dynamic Engineering',
     overallStatus: 'Pass',
+    riskScore: 22,
+    riskAnomalies: ['Minor PAN mismatch in secondary docs'],
     criteria: {
       crit_1: { id: 'crit_1', category: 'Financial', description: 'Turnover', requirement: '₹5Cr', isMandatory: true, status: 'Pass', extractedValue: '₹12.4 Crore', confidenceScore: 0.99 },
       crit_2: { id: 'crit_2', category: 'Technical', description: 'Projects', requirement: '3 Projects', isMandatory: true, status: 'Pass', extractedValue: '6 Projects', confidenceScore: 0.97 },
       crit_3: { id: 'crit_3', category: 'Compliance', description: 'GST', requirement: 'Valid', isMandatory: true, status: 'Pass', extractedValue: 'Verified', confidenceScore: 0.99 },
-      crit_4: { id: 'crit_4', category: 'Compliance', description: 'ISO', requirement: 'Valid', isMandatory: true, status: 'Pass', extractedValue: 'Verified', confidenceScore: 0.98 },
+      crit_4: { id: 'crit_4', category: 'Compliance', description: 'ISO', requirement: 'Valid', isMandatory: false, status: 'Fail', extractedValue: 'Expired', confidenceScore: 0.98 },
     },
   },
   {
     id: 'bid_5',
     name: 'East-West Infra',
     overallStatus: 'Pass',
+    riskScore: 75,
+    riskAnomalies: ['Predatory pricing (82% below average)', 'Shell company pattern detected'],
     criteria: {
       crit_1: { id: 'crit_1', category: 'Financial', description: 'Turnover', requirement: '₹5Cr', isMandatory: true, status: 'Pass', extractedValue: '₹5.1 Crore', confidenceScore: 0.89 },
       crit_2: { id: 'crit_2', category: 'Technical', description: 'Projects', requirement: '3 Projects', isMandatory: true, status: 'Pass', extractedValue: '3 Projects', confidenceScore: 0.91 },
       crit_3: { id: 'crit_3', category: 'Compliance', description: 'GST', requirement: 'Valid', isMandatory: true, status: 'Pass', extractedValue: 'Verified', confidenceScore: 0.99 },
-      crit_4: { id: 'crit_4', category: 'Compliance', description: 'ISO', requirement: 'Valid', isMandatory: true, status: 'Pass', extractedValue: 'Verified', confidenceScore: 0.97 },
+      crit_4: { id: 'crit_4', category: 'Compliance', description: 'ISO', requirement: 'Valid', isMandatory: false, status: 'Pass', extractedValue: 'Verified', confidenceScore: 0.97 },
     },
   },
   {
     id: 'bid_6',
     name: 'Falcon Constructions',
     overallStatus: 'Needs Review',
+    riskScore: 52,
+    riskAnomalies: ['Ambiguous completion dates', 'Unclear parent company relationship'],
     criteria: {
       crit_1: { id: 'crit_1', category: 'Financial', description: 'Turnover', requirement: '₹5Cr', isMandatory: true, status: 'Pass', extractedValue: '₹7.8 Crore', confidenceScore: 0.95 },
       crit_2: { id: 'crit_2', category: 'Technical', description: 'Projects', requirement: '3 Projects', isMandatory: true, status: 'Needs Review', extractedValue: 'Ambiguous completion dates', confidenceScore: 0.55 },
       crit_3: { id: 'crit_3', category: 'Compliance', description: 'GST', requirement: 'Valid', isMandatory: true, status: 'Pass', extractedValue: 'Verified', confidenceScore: 0.99 },
-      crit_4: { id: 'crit_4', category: 'Compliance', description: 'ISO', requirement: 'Valid', isMandatory: true, status: 'Pass', extractedValue: 'Verified', confidenceScore: 0.97 },
+      crit_4: { id: 'crit_4', category: 'Compliance', description: 'ISO', requirement: 'Valid', isMandatory: false, status: 'Pass', extractedValue: 'Verified', confidenceScore: 0.97 },
     },
   },
   {
     id: 'bid_7',
     name: 'Global Builders',
     overallStatus: 'Pass',
+    riskScore: 18,
+    riskAnomalies: [],
     criteria: {
       crit_1: { id: 'crit_1', category: 'Financial', description: 'Turnover', requirement: '₹5Cr', isMandatory: true, status: 'Pass', extractedValue: '₹9.2 Crore', confidenceScore: 0.98 },
       crit_2: { id: 'crit_2', category: 'Technical', description: 'Projects', requirement: '3 Projects', isMandatory: true, status: 'Pass', extractedValue: '4 Projects', confidenceScore: 0.94 },
       crit_3: { id: 'crit_3', category: 'Compliance', description: 'GST', requirement: 'Valid', isMandatory: true, status: 'Pass', extractedValue: 'Verified', confidenceScore: 0.99 },
-      crit_4: { id: 'crit_4', category: 'Compliance', description: 'ISO', requirement: 'Valid', isMandatory: true, status: 'Pass', extractedValue: 'Verified', confidenceScore: 0.97 },
+      crit_4: { id: 'crit_4', category: 'Compliance', description: 'ISO', requirement: 'Valid', isMandatory: false, status: 'Pass', extractedValue: 'Verified', confidenceScore: 0.97 },
     },
   },
   {
     id: 'bid_8',
     name: 'Heritage Foundations',
     overallStatus: 'Fail',
+    riskScore: 68,
+    riskAnomalies: ['Technical shortfall', 'History of project delays'],
     criteria: {
       crit_1: { id: 'crit_1', category: 'Financial', description: 'Turnover', requirement: '₹5Cr', isMandatory: true, status: 'Pass', extractedValue: '₹6.5 Crore', confidenceScore: 0.97 },
       crit_2: { id: 'crit_2', category: 'Technical', description: 'Projects', requirement: '3 Projects', isMandatory: true, status: 'Fail', extractedValue: '2 Projects', confidenceScore: 0.99 },
       crit_3: { id: 'crit_3', category: 'Compliance', description: 'GST', requirement: 'Valid', isMandatory: true, status: 'Pass', extractedValue: 'Verified', confidenceScore: 0.99 },
-      crit_4: { id: 'crit_4', category: 'Compliance', description: 'ISO', requirement: 'Valid', isMandatory: true, status: 'Pass', extractedValue: 'Verified', confidenceScore: 0.97 },
+      crit_4: { id: 'crit_4', category: 'Compliance', description: 'ISO', requirement: 'Valid', isMandatory: false, status: 'Pass', extractedValue: 'Verified', confidenceScore: 0.97 },
     },
   },
   {
     id: 'bid_9',
     name: 'Indus Valley Infra',
     overallStatus: 'Pass',
+    riskScore: 25,
+    riskAnomalies: [],
     criteria: {
       crit_1: { id: 'crit_1', category: 'Financial', description: 'Turnover', requirement: '₹5Cr', isMandatory: true, status: 'Pass', extractedValue: '₹5.9 Crore', confidenceScore: 0.96 },
       crit_2: { id: 'crit_2', category: 'Technical', description: 'Projects', requirement: '3 Projects', isMandatory: true, status: 'Pass', extractedValue: '3 Projects', confidenceScore: 0.93 },
       crit_3: { id: 'crit_3', category: 'Compliance', description: 'GST', requirement: 'Valid', isMandatory: true, status: 'Pass', extractedValue: 'Verified', confidenceScore: 0.99 },
-      crit_4: { id: 'crit_4', category: 'Compliance', description: 'ISO', requirement: 'Valid', isMandatory: true, status: 'Pass', extractedValue: 'Verified', confidenceScore: 0.97 },
+      crit_4: { id: 'crit_4', category: 'Compliance', description: 'ISO', requirement: 'Valid', isMandatory: false, status: 'Pass', extractedValue: 'Verified', confidenceScore: 0.97 },
     },
   },
   {
     id: 'bid_10',
     name: 'Jupiter Structures',
     overallStatus: 'Pass',
+    riskScore: 5,
+    riskAnomalies: [],
     criteria: {
       crit_1: { id: 'crit_1', category: 'Financial', description: 'Turnover', requirement: '₹5Cr', isMandatory: true, status: 'Pass', extractedValue: '₹15.0 Crore', confidenceScore: 0.99 },
       crit_2: { id: 'crit_2', category: 'Technical', description: 'Projects', requirement: '3 Projects', isMandatory: true, status: 'Pass', extractedValue: '8 Projects', confidenceScore: 0.98 },
       crit_3: { id: 'crit_3', category: 'Compliance', description: 'GST', requirement: 'Valid', isMandatory: true, status: 'Pass', extractedValue: 'Verified', confidenceScore: 0.99 },
-      crit_4: { id: 'crit_4', category: 'Compliance', description: 'ISO', requirement: 'Valid', isMandatory: true, status: 'Pass', extractedValue: 'Verified', confidenceScore: 0.97 },
+      crit_4: { id: 'crit_4', category: 'Compliance', description: 'ISO', requirement: 'Valid', isMandatory: false, status: 'Pass', extractedValue: 'Verified', confidenceScore: 0.97 },
     },
   },
 ];
